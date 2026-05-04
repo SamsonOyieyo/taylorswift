@@ -25,7 +25,7 @@ flutter:
 # This section configures the Windows Setup Wizard
 inno_bundle:
   # This is a unique Windows GUID generated for your app
-  id: {0B8C24D3-A1B2-4E5F-BD7C-8D4A228B1234}
+  id: 0B8C24D3-A1B2-4E5F-BD7C-8D4A228B1234
   name: Taylor Swift App
   publisher: Samson Oyieyo
   display_name: Taylor Swift App
