@@ -1,21 +1,21 @@
 name: Build and Release Flutter App
 
-# Trigger the workflow when a version tag is pushed (e.g., v1.0.0)
+# Trigger the workflow only when a version tag is pushed (e.g., v1.0.0)
 on:
   push:
     tags:
       - 'v*'
 
-# Grant permissions to create a GitHub Release
+# Grant permissions to create and write to a GitHub Release
 permissions:
   contents: write
 
 jobs:
   # ------------------------------------
-  # JOB 1: Build Android APK
+  # JOB 1: Build Android APKs (Split by ABI)
   # ------------------------------------
   build-android:
-    name: Build Android APK
+    name: Build Android APKs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -36,18 +36,31 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build Split APKs
+        # Generates separate optimized APKs for different architectures
+        run: flutter build apk --release --split-per-abi
 
-      - name: Upload APK to Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload APKs to Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: build/app/outputs/flutter-apk/app-release.apk
+          # Grabs all generated APKs
+          files: build/app/outputs/flutter-apk/*-release.apk
+          # Adds a helpful description to your GitHub Release page
+          body: |
+            ## 📱 Android Installation
+            - **arm64-v8a**: Most modern Android phones (Use this if unsure).
+            - **armeabi-v7a**: Older 32-bit Android phones.
+            - **x86_64**: Tablets or Emulators.
+            
+            ## 💻 Windows Installation
+            - Download the `windows-release.zip` file.
+            - Right-click and select **Extract All**.
+            - Open the extracted folder and double-click the `.exe` file to play!
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ------------------------------------
-  # JOB 2: Build Windows EXE (Zipped)
+  # JOB 2: Build Windows App (Zipped Portable)
   # ------------------------------------
   build-windows:
     name: Build Windows App
@@ -69,11 +82,11 @@ jobs:
         run: flutter build windows --release
 
       - name: Zip Windows Release Folder
-        # Zips the .exe, .dlls, and data folder required for the app to run
+        # Zips the .exe, .dlls, and data folder so the user gets everything they need
         run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath windows-release.zip
 
       - name: Upload Windows ZIP to Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: windows-release.zip
         env:
