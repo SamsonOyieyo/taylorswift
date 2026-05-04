@@ -77,8 +77,9 @@ jobs:
         run: flutter build windows --release
 
       # NEW: This command takes your build and wraps it into a professional installer
+     # Change this step
       - name: Build Windows Installer
-        run: dart run inno_bundle:build
+        run: dart run inno_bundle
 
       # NEW: Uploads the generated setup.exe file
       - name: Upload Windows Installer to Release
